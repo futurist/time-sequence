@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-preset-es2015": "^6.24.1"
+  },
+  "name": "time-sequence",
+  "version": "1.0.0",
+  "main": "dist/index.cjs.js",
+  "repository": "https://github.com/futurist/time-sequence",
+  "author": "futurist <jamesyang999@gmail.com>",
+  "license": "Apache-2.0",
+  "description": "Reliable time sequence using setTimeout"
+}
