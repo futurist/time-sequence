@@ -2,37 +2,57 @@ class TimeSequence {
   constructor (seqArr, config) {
     this.timerIds = []
     this.currentJob = []
-    this.paused = true
+    this.isPaused = true
     this.offset = 0
-    this.seq = seqArr
+    this.elapsed = 0
+    this.real = 0
+    this.hold = 0
+    this.min = 16
+    this.index=0
+    this.seq = seqArr || []
     this.config = config || {}
-    this.next(seqArr)
+    this.next()
   }
-  next (seq) {
-    const {config} = this
-    const curDelay = seq[0]*1000 - this.offset
+  next (already=0) {
+    this.isPaused = false
+    const {config, seq, index} = this
+    const {canSkip, onTime, onEnd} = config
+    this.real += already
+    const delay = seq[index]*1000
+    const curDelay = this.elapsed + delay - this.real
     const start = +new Date()
-    this.currentJob = [start, curDelay, seq]
-    this.timerIds.push(setTimeout(() => {
-      config.onTime && config.onTime(curDelay, start, this)
-      var remaining = seq.slice(1)
-      if (remaining.length) {
-        const realDelay = +new Date - start
-        this.offset = realDelay - curDelay
-        this.next(remaining)
+    this.currentJob = [start, curDelay]
+    const workFn = (skip) => {
+      this.elapsed+= delay
+      const finishTime = +new Date
+      this.real += finishTime - start
+      onTime && onTime(this, skip)
+      this.index++
+      if (this.index<seq.length) {
+        this.real += +new Date - finishTime
+        this.next()
+      } else {
+        onEnd && onEnd(this)
       }
-    }, curDelay))
+    }
+    if(curDelay>this.min) this.timerIds.push(setTimeout(workFn, curDelay))
+    else if(!canSkip) workFn()
+    else workFn(true)
+  }
+
+  pause(){
+    this.isPaused = true
+    this.hold = +new Date
+    this.timerIds.forEach(clearTimeout)
+    this.timerIds = []
+  }
+
+  play(){
+    const {currentJob, hold} = this
+    const before = hold - (currentJob[0]||0)
+    this.next(before)
   }
 }
 
-let prev=0
-new TimeSequence(Array(30).fill(0.1), {
-  onTime: (a,b,c)=>{
-    console.log(b, b-prev, c.offset)
-    prev = b
-    eval(`const arr = []
-    for(let i=0;i<1000000;i++){
-      arr.push(i)
-    }`)
-  }
-})
+module.exports = TimeSequence
+
