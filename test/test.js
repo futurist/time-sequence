@@ -1,7 +1,7 @@
 const TimeSequence = require('../src')
 
 let prev=0
-let a = new TimeSequence(Array(20).fill(.1), {
+let a = new TimeSequence(Array(20).fill(100), {
   canSkip: true,
   onTime: (c,skip)=>{
     const [start, delay] = c.currentJob

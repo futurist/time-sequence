@@ -18,7 +18,7 @@ class TimeSequence {
     const {config, seq, index} = this
     const {canSkip, onTime, onEnd} = config
     this.real += already
-    const delay = seq[index]*1000
+    const delay = seq[index]
     const curDelay = this.elapsed + delay - this.real
     const start = +new Date()
     this.currentJob = [start, curDelay]
