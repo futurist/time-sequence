@@ -30,9 +30,14 @@ class TimeSequence {
   next (already=0) {
     this.isPaused = false
     const {config, seq, index} = this
-    const {canSkip, onTime, onEnd} = config
+    const {canSkip, onTime, onEnd, isAbs} = config
+    if (index>=seq.length) {
+      return onEnd && onEnd(this)
+    }
     this.real += already
-    const delay = seq[index]
+    const delay = isAbs
+      ? index<1 ? 0 : seq[index]-seq[index-1]
+      : seq[index]
     const curDelay = this.elapsed + delay - this.real
     const start = Date.now()
     this.currentJob = [start, curDelay]
@@ -42,12 +47,8 @@ class TimeSequence {
       this.real += finishTime - start
       onTime && onTime(this, skip)
       this.index++
-      if (this.index<seq.length) {
-        this.real += Date.now() - finishTime
-        this.next()
-      } else {
-        onEnd && onEnd(this)
-      }
+      this.real += Date.now() - finishTime
+      this.next()
     }
     if(curDelay>this.min) this.timerIds.push(setTimeout(workFn, curDelay))
     else if(!canSkip) workFn()
