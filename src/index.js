@@ -1,3 +1,17 @@
+var performance = typeof window !== 'undefined' && window.performance
+var hrtime = typeof process !== 'undefined' && process
+  && typeof process.hrtime === 'function' && process.hrtime
+
+function now() {
+  if(performance!==false) return performance.now()
+  else if(hrtime!==false) {
+    var t = hrtime()
+    return (t[0] + t[1] / 1e9) * 1000
+  } else {
+    return Date.now()
+  }
+}
+
 class TimeSequence {
   constructor (seqArr, config) {
     this.timerIds = []
@@ -20,16 +34,16 @@ class TimeSequence {
     this.real += already
     const delay = seq[index]
     const curDelay = this.elapsed + delay - this.real
-    const start = +new Date()
+    const start = Date.now()
     this.currentJob = [start, curDelay]
     const workFn = (skip) => {
       this.elapsed+= delay
-      const finishTime = +new Date
+      const finishTime = Date.now()
       this.real += finishTime - start
       onTime && onTime(this, skip)
       this.index++
       if (this.index<seq.length) {
-        this.real += +new Date - finishTime
+        this.real += Date.now() - finishTime
         this.next()
       } else {
         onEnd && onEnd(this)
@@ -42,7 +56,7 @@ class TimeSequence {
 
   pause(){
     this.isPaused = true
-    this.hold = +new Date
+    this.hold = Date.now()
     this.timerIds.forEach(clearTimeout)
     this.timerIds = []
   }
