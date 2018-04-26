@@ -63,6 +63,7 @@ class TimeSequence {
   }
 
   play(){
+    if(!this.isPaused) return
     const {currentJob, hold} = this
     const before = hold - (currentJob[0]||0)
     this.next(before)
