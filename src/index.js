@@ -24,8 +24,8 @@ class TimeSequence {
     this.min = 16
     this.index=0
     this.seq = seqArr || []
-    this.config = config || {}
-    this.next()
+    config = this.config = config || {}
+    if(config.autoStart) this.next()
   }
   next (already=0) {
     this.isPaused = false
